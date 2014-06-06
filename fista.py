@@ -2,6 +2,7 @@ import numpy as np
 import math
 import scipy.sparse as sps
 import scipy.sparse.linalg
+import scipy.linalg
 import time
 
 def fista(I, Phi, lambdav, max_iterations=150, display=False):
@@ -19,8 +20,11 @@ def fista(I, Phi, lambdav, max_iterations=150, display=False):
   Q = Phi.T.dot(Phi)
   c = -2*Phi.T.dot(I)
 
-  last_eig = Q.shape[0]-1
-  L = scipy.linalg.eigh(2*Q, eigvals_only=True, eigvals=(last_eig,last_eig))[0]
+  if sps.issparse(Q):
+    L = scipy.sparse.linalg.eigsh(2*Q, 1, which='LM')[0]
+  else:
+    last_eig = Q.shape[0]-1
+    L = scipy.linalg.eigh(2*Q, eigvals_only=True, eigvals=(last_eig,last_eig))[0]
   invL = 1/float(L)
 
   y = x
